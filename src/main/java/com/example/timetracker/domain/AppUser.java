@@ -21,6 +21,8 @@ public class AppUser {
 
     private String fullName;
 
+    private Boolean isBlocked = false;
+
     @OneToMany(mappedBy = "user")
     private List<TimeEntry> timeEntries = new ArrayList<>();
 
