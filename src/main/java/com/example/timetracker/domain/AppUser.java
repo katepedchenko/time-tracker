@@ -24,7 +24,7 @@ public class AppUser {
     private Boolean isBlocked = false;
 
     @OneToMany(mappedBy = "user")
-    private List<TimeEntry> timeEntries = new ArrayList<>();
+    private List<WorkdayEntry> workdayEntries = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_user_role",

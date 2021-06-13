@@ -45,8 +45,8 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create_time_entry_table" author="andrew">
-        <createTable tableName="time_entry">
+    <changeSet id="create_workday_entry_table" author="andrew">
+        <createTable tableName="workday_entry">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
@@ -57,6 +57,22 @@
                 <constraints
                         foreignKeyName="fk_ai_user_id"
                         referencedTableName="app_user"
+                        referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_time_entry_table" author="andrew">
+        <createTable tableName="time_entry">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="started_at" type="timestamp"/>
+            <column name="finished_at" type="timestamp"/>
+            <column name="workday_entry_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_ai_workday_entry_id"
+                        referencedTableName="workday_entry"
                         referencedColumnNames="id"/>
             </column>
         </createTable>
