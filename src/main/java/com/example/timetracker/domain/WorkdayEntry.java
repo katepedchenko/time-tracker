@@ -3,15 +3,19 @@ package com.example.timetracker.domain;
 import com.example.timetracker.repository.converter.LocalDateTimeConverter;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+@Entity
 @Getter
 @Setter
-@Entity
-public class TimeEntry {
+public class WorkdayEntry {
 
     @Id
     @GeneratedValue
@@ -23,8 +27,14 @@ public class TimeEntry {
     @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime finishedAt;
 
-    // todo add duration
+    @Enumerated(EnumType.STRING)
+    private EntryStatus status;
 
     @ManyToOne
-    private WorkdayEntry workdayEntry;
+    private AppUser user;
+
+    @OneToMany(mappedBy = "workdayEntry", fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<TimeEntry> timeEntries = new ArrayList<>();
 }

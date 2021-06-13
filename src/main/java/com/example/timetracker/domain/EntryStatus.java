@@ -1,6 +1,6 @@
 package com.example.timetracker.domain;
 
-public enum TimeEntryStatus {
+public enum EntryStatus {
     STARTED,
     PAUSED,
     FINISHED
