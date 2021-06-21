@@ -8,24 +8,13 @@ import com.example.timetracker.exception.EntityNotFoundException;
 import com.example.timetracker.repository.AppUserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from app_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class AppUserServiceTest {
+public class AppUserServiceTest extends BaseServiceTest {
 
     @Autowired
     private AppUserRepository appUserRepository;
@@ -35,7 +24,7 @@ public class AppUserServiceTest {
 
     @Test
     public void testUserById() {
-        AppUser expectedResult = createUser();
+        AppUser expectedResult = testObjectFactory.createUser();
 
         AppUserReadDTO readDTO = appUserService.getUserById(expectedResult.getId());
 
@@ -69,7 +58,7 @@ public class AppUserServiceTest {
 
     @Test
     public void testUpdateUser() {
-        AppUser user = createUser();
+        AppUser user = testObjectFactory.createUser();
 
         AppUserUpdateDTO updateDTO = new AppUserUpdateDTO();
         updateDTO.setExternalId("new_ext_id");
@@ -87,7 +76,7 @@ public class AppUserServiceTest {
 
     @Test
     public void testBlockUser() {
-        AppUser user = createUser(false);
+        AppUser user = testObjectFactory.createUser(false);
 
         AppUserReadDTO readDTO = appUserService.blockUserById(user.getId());
 
@@ -99,7 +88,7 @@ public class AppUserServiceTest {
 
     @Test
     public void testUnblockUser() {
-        AppUser user = createUser(true);
+        AppUser user = testObjectFactory.createUser(true);
 
         AppUserReadDTO readDTO = appUserService.unblockUserById(user.getId());
 
@@ -107,23 +96,5 @@ public class AppUserServiceTest {
 
         AppUser unblockedUser = appUserRepository.findById(user.getId()).get();
         assertFalse(unblockedUser.getIsBlocked());
-    }
-
-    private AppUser createUser() {
-        AppUser user = new AppUser();
-        user.setIsBlocked(Boolean.FALSE);
-        user.setFullName("Charles Folk");
-        user.setExternalId("122244");
-
-        return appUserRepository.save(user);
-    }
-
-    private AppUser createUser(boolean isBlocked) {
-        AppUser user = new AppUser();
-        user.setIsBlocked(isBlocked);
-        user.setFullName("Charles Folk");
-        user.setExternalId("122244");
-
-        return appUserRepository.save(user);
     }
 }

@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +35,19 @@ public class WorkdayEntryServiceImpl implements WorkdayEntryService {
     @Override
     public List<WorkdayEntryReadDTO> getUserWorkdayEntries(UUID userId) {
         List<WorkdayEntry> entries = workdayEntryRepository.findByUserId(userId);
-        return translationService.translateList(entries, WorkdayEntryReadDTO.class);
+
+        List<WorkdayEntryReadDTO> dtoList = new ArrayList<>(entries.size());
+
+        for (WorkdayEntry entry : entries) {
+            WorkdayEntryReadDTO dto = translationService.translate(entry, WorkdayEntryReadDTO.class);
+
+            Duration duration = calculateTotalTime(entry);
+            dto.setTotalTime(duration);
+
+            dtoList.add(dto);
+        }
+
+        return dtoList;
     }
 
     @Transactional
@@ -60,6 +74,7 @@ public class WorkdayEntryServiceImpl implements WorkdayEntryService {
         workdayEntry = workdayEntryRepository.save(workdayEntry);
 
         WorkdayEntryReadDTO dto = translationService.translate(workdayEntry, WorkdayEntryReadDTO.class);
+        dto.setTotalTime(calculateTotalTime(workdayEntry));
         dto.setUserId(workdayEntry.getUser().getId());
         return dto;
     }
@@ -80,6 +95,7 @@ public class WorkdayEntryServiceImpl implements WorkdayEntryService {
         workdayEntry = workdayEntryRepository.save(workdayEntry);
 
         WorkdayEntryReadDTO dto = translationService.translate(workdayEntry, WorkdayEntryReadDTO.class);
+        dto.setTotalTime(calculateTotalTime(workdayEntry));
         dto.setUserId(userId);
         return dto;
     }
@@ -99,6 +115,7 @@ public class WorkdayEntryServiceImpl implements WorkdayEntryService {
         workdayEntry = workdayEntryRepository.save(workdayEntry);
 
         WorkdayEntryReadDTO dto = translationService.translate(workdayEntry, WorkdayEntryReadDTO.class);
+        dto.setTotalTime(calculateTotalTime(workdayEntry));
         dto.setUserId(userId);
         return dto;
     }
@@ -121,6 +138,7 @@ public class WorkdayEntryServiceImpl implements WorkdayEntryService {
         workdayEntry = workdayEntryRepository.save(workdayEntry);
 
         WorkdayEntryReadDTO dto = translationService.translate(workdayEntry, WorkdayEntryReadDTO.class);
+        dto.setTotalTime(calculateTotalTime(workdayEntry));
         dto.setUserId(userId);
         return dto;
     }
@@ -133,5 +151,12 @@ public class WorkdayEntryServiceImpl implements WorkdayEntryService {
     private boolean hasNotFinishedWorkdayEntries(UUID userId) {
         List<WorkdayEntry> notFinishedEntries = workdayEntryRepository.findByUserIdAndFinishedAtIsNull(userId);
         return !notFinishedEntries.isEmpty();
+    }
+
+    private Duration calculateTotalTime(WorkdayEntry entry) {
+        return entry.getTimeEntries()
+                .stream()
+                .map(TimeEntry::getDuration)
+                .reduce(Duration.ZERO, Duration::plus);
     }
 }

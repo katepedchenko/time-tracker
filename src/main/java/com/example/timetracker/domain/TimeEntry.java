@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -23,8 +25,10 @@ public class TimeEntry {
     @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime finishedAt;
 
-    // todo add duration
-
     @ManyToOne
     private WorkdayEntry workdayEntry;
+
+    public Duration getDuration() {
+        return Duration.between(startedAt, Objects.requireNonNullElseGet(finishedAt, LocalDateTime::now));
+    }
 }
