@@ -83,6 +83,10 @@ public class AppUserControllerTest {
         AppUserCreateDTO createDTO = new AppUserCreateDTO();
         createDTO.setExternalId("2233455");
         createDTO.setFullName("Marcus Bowie");
+        createDTO.setWorkHoursNorm(9);
+        createDTO.setEmail("test@mail.com");
+        createDTO.setAllowedOvertimeHours(1);
+        createDTO.setAllowedPausedHours(1);
 
         AppUserReadDTO expectedResult = createUserReadDTO(UserRoleType.USER);
 
@@ -109,6 +113,10 @@ public class AppUserControllerTest {
         updateDTO.setExternalId("2233455");
         updateDTO.setFullName("Marcus Bowie");
         updateDTO.setIsBlocked(Boolean.FALSE);
+        updateDTO.setWorkHoursNorm(9);
+        updateDTO.setEmail("test@mail.com");
+        updateDTO.setAllowedOvertimeHours(1);
+        updateDTO.setAllowedPausedHours(1);
 
         AppUserReadDTO expectedResult = createUserReadDTO(UserRoleType.USER);
 
@@ -172,6 +180,10 @@ public class AppUserControllerTest {
         dto.setId(UUID.randomUUID());
         dto.setFullName("Marcus Bowie");
         dto.setExternalId("2233455");
+        dto.setWorkHoursNorm(9);
+        dto.setAllowedOvertimeHours(1);
+        dto.setAllowedPausedHours(1);
+        dto.setEmail("test@mail.com");
         dto.setUserRoles(List.of(createRoleReadDTO(roleType)));
 
         return dto;

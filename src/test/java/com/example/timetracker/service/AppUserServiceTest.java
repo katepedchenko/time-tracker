@@ -64,10 +64,14 @@ public class AppUserServiceTest extends BaseServiceTest {
         updateDTO.setExternalId("new_ext_id");
         updateDTO.setFullName("new name");
         updateDTO.setIsBlocked(Boolean.TRUE);
+        updateDTO.setWorkHoursNorm(9);
+        updateDTO.setEmail("test@mail.com");
+        updateDTO.setAllowedOvertimeHours(1);
+        updateDTO.setAllowedPausedHours(1);
 
         AppUserReadDTO readDTO = appUserService.updateUser(user.getId(), updateDTO);
 
-        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO);
+        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
 
         AppUser updatedUser = appUserRepository.findById(user.getId()).get();
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(updatedUser,

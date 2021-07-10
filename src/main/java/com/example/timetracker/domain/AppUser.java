@@ -21,6 +21,14 @@ public class AppUser {
 
     private String fullName;
 
+    private String email;
+
+    private Integer workHoursNorm;
+
+    private Integer allowedOvertimeHours;
+
+    private Integer allowedPausedHours;
+
     private Boolean isBlocked = false;
 
     @OneToMany(mappedBy = "user")

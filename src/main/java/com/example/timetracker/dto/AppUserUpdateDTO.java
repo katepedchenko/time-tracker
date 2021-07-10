@@ -10,4 +10,12 @@ public class AppUserUpdateDTO {
     private String fullName;
 
     private Boolean isBlocked;
+
+    private String email;
+
+    private Integer workHoursNorm;
+
+    private Integer allowedOvertimeHours;
+
+    private Integer allowedPausedHours;
 }

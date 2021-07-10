@@ -29,6 +29,10 @@ public class TestObjectFactory {
         user.setIsBlocked(Boolean.FALSE);
         user.setFullName("Charles Folk");
         user.setExternalId("122244");
+        user.setEmail("test@mail.com");
+        user.setWorkHoursNorm(9);
+        user.setAllowedOvertimeHours(1);
+        user.setAllowedPausedHours(1);
 
         return appUserRepository.save(user);
     }
@@ -38,6 +42,10 @@ public class TestObjectFactory {
         user.setIsBlocked(isBlocked);
         user.setFullName("Charles Folk");
         user.setExternalId("122244");
+        user.setEmail("test@mail.com");
+        user.setWorkHoursNorm(9);
+        user.setAllowedOvertimeHours(1);
+        user.setAllowedPausedHours(1);
 
         return appUserRepository.save(user);
     }

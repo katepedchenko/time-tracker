@@ -1,0 +1,18 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="add isBlocked to app_user" author="andrew">
+        <addColumn tableName="app_user">
+            <column name="email" type="varchar(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="work_hours_norm" type="int"/>
+            <column name="allowed_overtime_hours" type="int"/>
+            <column name="allowed_paused_hours" type="int"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
