@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +24,18 @@ public class AppUserServiceTest extends BaseServiceTest {
     private AppUserService appUserService;
 
     @Test
+    public void testGetAllUsers() {
+        AppUser u1 = testObjectFactory.createUser("1111", "test1@mail.com");
+        AppUser u2 = testObjectFactory.createUser("2222", "test2@mail.com");
+        AppUser u3 = testObjectFactory.createUser("3333", "test3@mail.com");
+
+        List<AppUserReadDTO> allUsers = appUserService.getAllUsers();
+
+        Assertions.assertThat(allUsers).extracting("id")
+                .containsExactlyInAnyOrder(u1.getId(), u2.getId(), u3.getId());
+    }
+
+    @Test
     public void testUserById() {
         AppUser expectedResult = testObjectFactory.createUser();
 
@@ -32,7 +45,7 @@ public class AppUserServiceTest extends BaseServiceTest {
     }
 
     @Test()
-    public void testGetRegistryByIdWrongId() {
+    public void testGetUserByIdWrongId() {
         final UUID wrongId = UUID.randomUUID();
 
         Assertions.assertThatThrownBy(() -> appUserService.getUserById(wrongId))

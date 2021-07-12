@@ -5,7 +5,7 @@ import com.example.timetracker.domain.UserRoleType;
 import com.example.timetracker.dto.AppUserReadDTO;
 import com.example.timetracker.dto.SummaryDTO;
 import com.example.timetracker.dto.UserRoleReadDTO;
-import com.example.timetracker.dto.WorkdayEntryReadDTO;
+import com.example.timetracker.dto.ActivityReadDTO;
 import com.example.timetracker.service.SummaryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
@@ -55,7 +55,7 @@ public class SummaryControllerTest {
         Mockito.verify(summaryService).createSummary(user.getId());
     }
 
-    private SummaryDTO createSummaryDTO(AppUserReadDTO userDTO, List<WorkdayEntryReadDTO> entries) {
+    private SummaryDTO createSummaryDTO(AppUserReadDTO userDTO, List<ActivityReadDTO> entries) {
         SummaryDTO dto = new SummaryDTO();
         dto.setEntries(entries);
         dto.setUser(userDTO);
@@ -79,8 +79,8 @@ public class SummaryControllerTest {
         return dto;
     }
 
-    private WorkdayEntryReadDTO createWorkdayReadDTO(UUID userId) {
-        WorkdayEntryReadDTO dto = new WorkdayEntryReadDTO();
+    private ActivityReadDTO createWorkdayReadDTO(UUID userId) {
+        ActivityReadDTO dto = new ActivityReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setUserId(userId);
         dto.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));

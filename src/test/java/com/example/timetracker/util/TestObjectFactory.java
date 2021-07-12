@@ -1,12 +1,10 @@
 package com.example.timetracker.util;
 
-import com.example.timetracker.domain.AppUser;
-import com.example.timetracker.domain.EntryStatus;
-import com.example.timetracker.domain.TimeEntry;
-import com.example.timetracker.domain.WorkdayEntry;
+import com.example.timetracker.domain.*;
 import com.example.timetracker.repository.AppUserRepository;
+import com.example.timetracker.repository.ProjectRepository;
 import com.example.timetracker.repository.TimeEntryRepository;
-import com.example.timetracker.repository.WorkdayEntryRepository;
+import com.example.timetracker.repository.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +17,13 @@ public class TestObjectFactory {
     private AppUserRepository appUserRepository;
 
     @Autowired
-    private WorkdayEntryRepository workdayEntryRepository;
+    private ActivityRepository activityRepository;
 
     @Autowired
     private TimeEntryRepository timeEntryRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     public AppUser createUser() {
         AppUser user = new AppUser();
@@ -30,6 +31,19 @@ public class TestObjectFactory {
         user.setFullName("Charles Folk");
         user.setExternalId("122244");
         user.setEmail("test@mail.com");
+        user.setWorkHoursNorm(9);
+        user.setAllowedOvertimeHours(1);
+        user.setAllowedPausedHours(1);
+
+        return appUserRepository.save(user);
+    }
+
+    public AppUser createUser(String externalId, String email) {
+        AppUser user = new AppUser();
+        user.setIsBlocked(Boolean.FALSE);
+        user.setFullName("Charles Folk");
+        user.setExternalId(externalId);
+        user.setEmail(email);
         user.setWorkHoursNorm(9);
         user.setAllowedOvertimeHours(1);
         user.setAllowedPausedHours(1);
@@ -50,30 +64,36 @@ public class TestObjectFactory {
         return appUserRepository.save(user);
     }
 
-    public TimeEntry createFinishedTimeEntry(WorkdayEntry workdayEntry) {
+    public TimeEntry createFinishedTimeEntry(Activity activity) {
         TimeEntry entry = new TimeEntry();
         entry.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));
         entry.setFinishedAt(LocalDateTime.of(2021, 5, 20, 12, 30, 0));
-        entry.setWorkdayEntry(workdayEntry);
+        entry.setActivity(activity);
 
         return timeEntryRepository.save(entry);
     }
 
-    public TimeEntry createNotFinishedTimeEntry(WorkdayEntry workdayEntry) {
+    public TimeEntry createNotFinishedTimeEntry(Activity activity) {
         TimeEntry entry = new TimeEntry();
         entry.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));
-        entry.setWorkdayEntry(workdayEntry);
+        entry.setActivity(activity);
 
         return timeEntryRepository.save(entry);
     }
 
-    public WorkdayEntry createWorkdayEntry(AppUser user, EntryStatus status) {
-        WorkdayEntry entry = new WorkdayEntry();
+    public Activity createActivity(AppUser user, EntryStatus status) {
+        Activity entry = new Activity();
         entry.setUser(user);
         entry.setStatus(status);
         entry.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));
 
-        return workdayEntryRepository.save(entry);
+        return activityRepository.save(entry);
     }
 
+    public Project createProject() {
+        Project project = new Project();
+        project.setName("Project name");
+        project.setStatus(ProjectStatus.ACTIVE);
+        return projectRepository.save(project);
+    }
 }

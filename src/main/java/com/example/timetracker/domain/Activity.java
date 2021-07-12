@@ -15,7 +15,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-public class WorkdayEntry {
+public class Activity {
 
     @Id
     @GeneratedValue
@@ -30,10 +30,15 @@ public class WorkdayEntry {
     @Enumerated(EnumType.STRING)
     private EntryStatus status;
 
+    private String description;
+
     @ManyToOne
     private AppUser user;
 
-    @OneToMany(mappedBy = "workdayEntry", fetch = FetchType.EAGER,
+    @ManyToOne
+    private Project project;
+
+    @OneToMany(mappedBy = "activity", fetch = FetchType.EAGER,
             cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(value = FetchMode.SUBSELECT)
     private List<TimeEntry> timeEntries = new ArrayList<>();

@@ -6,10 +6,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.UUID;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class NotFinishedWorkdayException extends RuntimeException {
+public class NotFinishedActivityException extends RuntimeException {
 
-    public NotFinishedWorkdayException(UUID userId) {
-        super(String.format("User %s has not finished workday entries. Please, finish last one and start new",
+    // todo
+    public NotFinishedActivityException(UUID userId) {
+        super(String.format("User %s has not finished activity. Please, finish last one and start new",
                 userId));
     }
 }

@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="create_app_user_table" author="andrew">
+    <changeSet id="create_app_user_table" author="kate">
         <createTable tableName="app_user">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
@@ -19,7 +19,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create_user_role_table" author="andrew">
+    <changeSet id="create_user_role_table" author="kate">
         <createTable tableName="user_role">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
@@ -28,7 +28,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create_user_user_role_table" author="andrew">
+    <changeSet id="create_user_user_role_table" author="kate">
         <createTable tableName="user_user_role">
             <column name="user_id" type="uuid">
                 <constraints foreignKeyName="uur_user_fk"
@@ -45,8 +45,8 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create_workday_entry_table" author="andrew">
-        <createTable tableName="workday_entry">
+    <changeSet id="create_activity_table" author="kate">
+        <createTable tableName="activity">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
@@ -62,17 +62,17 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create_time_entry_table" author="andrew">
+    <changeSet id="create_time_entry_table" author="kate">
         <createTable tableName="time_entry">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
             <column name="started_at" type="timestamp"/>
             <column name="finished_at" type="timestamp"/>
-            <column name="workday_entry_id" type="uuid">
+            <column name="activity_id" type="uuid">
                 <constraints
-                        foreignKeyName="fk_ai_workday_entry_id"
-                        referencedTableName="workday_entry"
+                        foreignKeyName="fk_ai_activity_id"
+                        referencedTableName="activity"
                         referencedColumnNames="id"/>
             </column>
         </createTable>

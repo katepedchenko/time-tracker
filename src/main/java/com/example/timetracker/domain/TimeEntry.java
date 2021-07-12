@@ -26,7 +26,7 @@ public class TimeEntry {
     private LocalDateTime finishedAt;
 
     @ManyToOne
-    private WorkdayEntry workdayEntry;
+    private Activity activity;
 
     public Duration getDuration() {
         return Duration.between(startedAt, Objects.requireNonNullElseGet(finishedAt, LocalDateTime::now));

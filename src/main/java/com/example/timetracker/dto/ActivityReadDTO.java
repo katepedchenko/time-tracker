@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-public class WorkdayEntryReadDTO {
+public class ActivityReadDTO {
 
     private UUID id;
 
@@ -19,9 +19,13 @@ public class WorkdayEntryReadDTO {
 
     private EntryStatus status;
 
+    private String description;
+
     private UUID userId;
 
     private List<TimeEntryReadDTO> timeEntries;
 
     private Duration totalTime;
+
+    private ProjectReadDTO project;
 }

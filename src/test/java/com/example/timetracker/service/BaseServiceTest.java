@@ -13,7 +13,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ActiveProfiles("test")
 @Sql(statements = {
         "delete from time_entry",
-        "delete from workday_entry",
+        "delete from activity",
+        "delete from project",
         "delete from app_user"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public abstract class BaseServiceTest {

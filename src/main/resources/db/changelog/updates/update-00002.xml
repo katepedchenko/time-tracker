@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="add isBlocked to app_user" author="andrew">
+    <changeSet id="add fields to app_user" author="kate">
         <addColumn tableName="app_user">
             <column name="email" type="varchar(255)">
                 <constraints unique="true"/>
