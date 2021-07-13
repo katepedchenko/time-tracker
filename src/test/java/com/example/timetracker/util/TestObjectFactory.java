@@ -81,12 +81,23 @@ public class TestObjectFactory {
         return timeEntryRepository.save(entry);
     }
 
-    public Activity createActivity(AppUser user, EntryStatus status) {
+    public Activity createActivity(AppUser user, EntryStatus status, Project project) {
         Activity entry = new Activity();
         entry.setUser(user);
         entry.setStatus(status);
         entry.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));
+        entry.setDescription("some text");
+        entry.setProject(project);
+        return activityRepository.save(entry);
+    }
 
+    public Activity createActivity(AppUser user, EntryStatus status, Project project, LocalDateTime localDateTime) {
+        Activity entry = new Activity();
+        entry.setUser(user);
+        entry.setStatus(status);
+        entry.setStartedAt(localDateTime);
+        entry.setDescription("some text");
+        entry.setProject(project);
         return activityRepository.save(entry);
     }
 

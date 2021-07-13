@@ -15,12 +15,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.setAllowComparingPrivateFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,7 +61,32 @@ public class ActivityControllerTest {
     }
 
     @Test
-    public void testStart() throws Exception {
+    public void testGetUserActivitiesByDate() throws Exception {
+        UUID userId = UUID.randomUUID();
+        ActivityReadDTO entry1 = createReadDTO(userId);
+        ActivityReadDTO entry2 = createReadDTO(userId);
+        ActivityReadDTO entry3 = createReadDTO(userId);
+        List<ActivityReadDTO> expectedResult = List.of(entry1, entry2, entry3);
+
+        LocalDate date = LocalDate.of(2021, 5, 22);
+
+        Mockito.when(activityService.getUserActivitiesByDate(userId, date))
+                .thenReturn(expectedResult);
+
+        String resultJson = mockMvc.perform(get("/api/v1/users/{userId}/activities", userId)
+                    .param("date", date.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<ActivityReadDTO> actualResult = mapper.readValue(resultJson, new TypeReference<>() {});
+
+        assertThat(actualResult).containsAll(expectedResult);
+
+        Mockito.verify(activityService).getUserActivitiesByDate(userId, date);
+    }
+
+    @Test
+    public void testCreateActivity() throws Exception {
         UUID userId = UUID.randomUUID();
         ActivityReadDTO expectedResult = createReadDTO(userId);
 
@@ -73,9 +98,9 @@ public class ActivityControllerTest {
                 .thenReturn(expectedResult);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/users/{userId}/activities/start", userId)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(createDTO)))
+                .perform(post("/api/v1/users/{userId}/activities", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -84,6 +109,27 @@ public class ActivityControllerTest {
         assertEquals(expectedResult, actualResult);
 
         Mockito.verify(activityService).createActivity(userId, createDTO);
+    }
+
+    @Test
+    public void testStart() throws Exception {
+        UUID userId = UUID.randomUUID();
+        ActivityReadDTO expectedResult = createReadDTO(userId);
+
+        Mockito.when(activityService.startActivity(userId, expectedResult.getId()))
+                .thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/activities/{id}/start",
+                        userId, expectedResult.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ActivityReadDTO actualResult = mapper.readValue(resultJson, ActivityReadDTO.class);
+
+        assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(activityService).startActivity(userId, expectedResult.getId());
     }
 
     @Test
