@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -46,9 +47,13 @@ public class ActivityServiceImpl implements ActivityService {
 
         WorkingDayReadDTO dto = new WorkingDayReadDTO();
         dto.setActivities(mapToReadDTOList(entries));
-        dto.setWorkHoursNorm(user.getWorkHoursNorm());
-        dto.setAllowedOvertimeHours(user.getAllowedOvertimeHours());
-        dto.setAllowedPausedHours(user.getAllowedPausedHours());
+
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+            dto.setWorkHoursNorm(user.getWorkHoursNorm());
+            dto.setAllowedOvertimeHours(user.getAllowedOvertimeHours());
+            dto.setAllowedPausedHours(user.getAllowedPausedHours());
+        }
 
         int totalHours = entries.stream().mapToInt(Activity::getHours).sum();
         dto.setTotalTrackedHours(totalHours);

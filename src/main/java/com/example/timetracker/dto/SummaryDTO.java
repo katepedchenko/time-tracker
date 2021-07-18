@@ -9,5 +9,5 @@ public class SummaryDTO {
 
     private AppUserReadDTO user;
 
-    private List<ActivityReadDTO> entries;
+    private List<WorkingDayReadDTO> entries;
 }

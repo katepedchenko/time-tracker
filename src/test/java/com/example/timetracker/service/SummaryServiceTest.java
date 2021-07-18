@@ -5,6 +5,8 @@ import com.example.timetracker.dto.SummaryDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SummaryServiceTest extends BaseServiceTest {
@@ -16,12 +18,15 @@ public class SummaryServiceTest extends BaseServiceTest {
     public void testCreateSummary() {
         AppUser user = testObjectFactory.createUser();
         Project project = testObjectFactory.createProject();
-        Activity activity = testObjectFactory.createActivity(user, ActivityStatus.NEW, project);
+        LocalDate beginDate = LocalDate.of(2021, 5, 15);
+        LocalDate endDate = LocalDate.of(2021, 5, 20);
+        testObjectFactory.createActivity(user, ActivityStatus.POSTED, project, beginDate);
+        testObjectFactory.createActivity(user, ActivityStatus.NEW, project, endDate);
 
-        SummaryDTO summary = summaryService.createSummary(user.getId());
+        SummaryDTO summary = summaryService.createSummary(user.getId(), beginDate, endDate);
 
         assertEquals(user.getId(), summary.getUser().getId());
-        assertEquals(1, summary.getEntries().size());
-        assertEquals(activity.getId(), summary.getEntries().get(0).getId());
+        assertEquals(6, summary.getEntries().size());
+        assertEquals(1, summary.getEntries().get(0).getActivities().size());
     }
 }

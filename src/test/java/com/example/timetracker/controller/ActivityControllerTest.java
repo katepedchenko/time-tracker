@@ -52,20 +52,6 @@ public class ActivityControllerTest {
         Mockito.verify(activityService).getUserActivitiesByDate(userId, date);
     }
 
-    private WorkingDayReadDTO createWorkingDayDTO(UUID userId, int workHoursNorm) {
-        WorkingDayReadDTO dto = new WorkingDayReadDTO();
-        List<ActivityReadDTO> activities = List.of(createReadDTO(userId), createReadDTO(userId));
-        dto.setActivities(activities);
-        dto.setWorkHoursNorm(workHoursNorm);
-        dto.setAllowedOvertimeHours(1);
-        dto.setAllowedPausedHours(1);
-
-        int totalHours = activities.stream().mapToInt(ActivityReadDTO::getHours).sum();
-        dto.setTotalTrackedHours(totalHours);
-        dto.setWorkHoursDelta(totalHours - workHoursNorm);
-        return dto;
-    }
-
     @Test
     public void testCreateActivity() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -151,6 +137,20 @@ public class ActivityControllerTest {
                 .andExpect(status().isOk());
 
         Mockito.verify(activityService).deleteActivity(userId, expectedResult.getId());
+    }
+
+    private WorkingDayReadDTO createWorkingDayDTO(UUID userId, int workHoursNorm) {
+        WorkingDayReadDTO dto = new WorkingDayReadDTO();
+        List<ActivityReadDTO> activities = List.of(createReadDTO(userId), createReadDTO(userId));
+        dto.setActivities(activities);
+        dto.setWorkHoursNorm(workHoursNorm);
+        dto.setAllowedOvertimeHours(1);
+        dto.setAllowedPausedHours(1);
+
+        int totalHours = activities.stream().mapToInt(ActivityReadDTO::getHours).sum();
+        dto.setTotalTrackedHours(totalHours);
+        dto.setWorkHoursDelta(totalHours - workHoursNorm);
+        return dto;
     }
 
     private ActivityReadDTO createReadDTO(UUID userId) {

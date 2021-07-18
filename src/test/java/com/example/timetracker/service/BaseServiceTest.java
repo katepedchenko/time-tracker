@@ -15,7 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
         "delete from activity",
         "delete from project",
         "delete from app_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public abstract class BaseServiceTest {
 
     @Autowired

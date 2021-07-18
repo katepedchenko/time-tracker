@@ -35,13 +35,20 @@ public class SummaryControllerTest {
     @Test
     public void testCreateSummary() throws Exception {
         AppUserReadDTO user = createUserReadDTO(UserRoleType.USER);
-        SummaryDTO expectedResult = createSummaryDTO(user, List.of(createActivityReadDTO(user.getId())));
+        WorkingDayReadDTO w1 = createWorkingDayDTO(user.getId(), 9);
+        WorkingDayReadDTO w2 = createWorkingDayDTO(user.getId(), 9);
+        SummaryDTO expectedResult = createSummaryDTO(user, List.of(w1, w2));
 
-        Mockito.when(summaryService.createSummary(user.getId()))
+        LocalDate beginDate = LocalDate.of(2021, 5, 11);
+        LocalDate endDate = LocalDate.of(2021, 5, 11);
+
+        Mockito.when(summaryService.createSummary(user.getId(), beginDate, endDate))
                 .thenReturn(expectedResult);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/users/{id}/summary", user.getId()))
+                .perform(get("/api/v1/users/{id}/summary", user.getId())
+                    .param("begin-date", beginDate.toString())
+                    .param("end-date", endDate.toString()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -49,13 +56,27 @@ public class SummaryControllerTest {
 
         Assertions.assertEquals(expectedResult, actualResult);
 
-        Mockito.verify(summaryService).createSummary(user.getId());
+        Mockito.verify(summaryService).createSummary(user.getId(), beginDate, endDate);
     }
 
-    private SummaryDTO createSummaryDTO(AppUserReadDTO userDTO, List<ActivityReadDTO> entries) {
+    private SummaryDTO createSummaryDTO(AppUserReadDTO userDTO, List<WorkingDayReadDTO> entries) {
         SummaryDTO dto = new SummaryDTO();
         dto.setEntries(entries);
         dto.setUser(userDTO);
+        return dto;
+    }
+
+    private WorkingDayReadDTO createWorkingDayDTO(UUID userId, int workHoursNorm) {
+        WorkingDayReadDTO dto = new WorkingDayReadDTO();
+        List<ActivityReadDTO> activities = List.of(createActivityReadDTO(userId), createActivityReadDTO(userId));
+        dto.setActivities(activities);
+        dto.setWorkHoursNorm(workHoursNorm);
+        dto.setAllowedOvertimeHours(1);
+        dto.setAllowedPausedHours(1);
+
+        int totalHours = activities.stream().mapToInt(ActivityReadDTO::getHours).sum();
+        dto.setTotalTrackedHours(totalHours);
+        dto.setWorkHoursDelta(totalHours - workHoursNorm);
         return dto;
     }
 
