@@ -1,0 +1,5 @@
+id;external_id;full_name;email;work_hours_norm;allowed_overtime_hours;allowed_paused_hours;is_blocked
+26c19841-6d1c-4b37-a0af-73e1f5258068;111;Matt (MANAGER);matt@company.com;9;2;1;false
+c1b040b7-d0dc-43c0-9d38-82628d399e93;222;Anna;anna@company.com;9;1;1;false
+09487a30-687c-4b17-908c-64d57fde6077;333;Kate;kate@company.com;9;1;1;false
+4c730826-8550-411b-9380-aa0653257d24;444;Peter;peter@company.com;9;0;1;false

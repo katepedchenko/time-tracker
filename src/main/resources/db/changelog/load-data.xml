@@ -1,0 +1,43 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="load users" author="kate" runOnChange="true">
+        <loadUpdateData tableName="app_user" file="db/data/app-users.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="external_id" type="string"/>
+            <column name="full_name" type="string"/>
+            <column name="email" type="string"/>
+            <column name="work_hours_norm" type="numeric"/>
+            <column name="allowed_overtime_hours" type="numeric"/>
+            <column name="allowed_paused_hours" type="numeric"/>
+            <column name="is_blocked" type="boolean"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load user-user-role" author="kate" runOnChange="true">
+        <loadUpdateData tableName="user_user_role" file="db/data/user-user-role.csv" separator=";" primaryKey="user_id,user_role_id">
+            <column name="user_id" type="uuid"/>
+            <column name="user_role_id" type="uuid"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load projects" author="kate" runOnChange="true">
+        <loadUpdateData tableName="project" file="db/data/projects.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="name" type="string"/>
+            <column name="status" type="string"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load activities" author="kate" runOnChange="true">
+        <loadUpdateData tableName="activity" file="db/data/activities.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="name" type="string"/>
+            <column name="status" type="string"/>
+        </loadUpdateData>
+    </changeSet>
+
+</databaseChangeLog>
