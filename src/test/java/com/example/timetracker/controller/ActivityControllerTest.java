@@ -1,12 +1,8 @@
 package com.example.timetracker.controller;
 
 import com.example.timetracker.domain.ActivityStatus;
-import com.example.timetracker.dto.ActivityCreateDTO;
-import com.example.timetracker.dto.ActivityReadDTO;
-import com.example.timetracker.dto.ActivityUpdateDTO;
-import com.example.timetracker.dto.ProjectReadDTO;
+import com.example.timetracker.dto.*;
 import com.example.timetracker.service.ActivityService;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,7 +16,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,37 +33,9 @@ public class ActivityControllerTest {
     private ActivityService activityService;
 
     @Test
-    public void testGetUserActivities() throws Exception {
-        UUID userId = UUID.randomUUID();
-        ActivityReadDTO entry1 = createReadDTO(userId);
-        ActivityReadDTO entry2 = createReadDTO(userId);
-        ActivityReadDTO entry3 = createReadDTO(userId);
-
-        List<ActivityReadDTO> expectedResult = List.of(entry1, entry2, entry3);
-
-        Mockito.when(activityService.getUserActivities(userId))
-                .thenReturn(expectedResult);
-
-        String resultJson = mockMvc.perform(get("/api/v1/users/{userId}/activities", userId))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<ActivityReadDTO> actualResult = mapper.readValue(resultJson, new TypeReference<>() {
-        });
-
-        assertThat(actualResult).containsAll(expectedResult);
-
-        Mockito.verify(activityService).getUserActivities(userId);
-    }
-
-    @Test
     public void testGetUserActivitiesByDate() throws Exception {
         UUID userId = UUID.randomUUID();
-        ActivityReadDTO entry1 = createReadDTO(userId);
-        ActivityReadDTO entry2 = createReadDTO(userId);
-        ActivityReadDTO entry3 = createReadDTO(userId);
-        List<ActivityReadDTO> expectedResult = List.of(entry1, entry2, entry3);
-
+        WorkingDayReadDTO expectedResult = createWorkingDayDTO(userId, 9);
         LocalDate date = LocalDate.of(2021, 5, 22);
 
         Mockito.when(activityService.getUserActivitiesByDate(userId, date))
@@ -79,12 +46,24 @@ public class ActivityControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<ActivityReadDTO> actualResult = mapper.readValue(resultJson, new TypeReference<>() {
-        });
+        WorkingDayReadDTO actualResult = mapper.readValue(resultJson, WorkingDayReadDTO.class);
 
-        assertThat(actualResult).containsAll(expectedResult);
-
+        assertEquals(expectedResult, actualResult);
         Mockito.verify(activityService).getUserActivitiesByDate(userId, date);
+    }
+
+    private WorkingDayReadDTO createWorkingDayDTO(UUID userId, int workHoursNorm) {
+        WorkingDayReadDTO dto = new WorkingDayReadDTO();
+        List<ActivityReadDTO> activities = List.of(createReadDTO(userId), createReadDTO(userId));
+        dto.setActivities(activities);
+        dto.setWorkHoursNorm(workHoursNorm);
+        dto.setAllowedOvertimeHours(1);
+        dto.setAllowedPausedHours(1);
+
+        int totalHours = activities.stream().mapToInt(ActivityReadDTO::getHours).sum();
+        dto.setTotalTrackedHours(totalHours);
+        dto.setWorkHoursDelta(totalHours - workHoursNorm);
+        return dto;
     }
 
     @Test

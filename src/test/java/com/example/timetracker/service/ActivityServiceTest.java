@@ -1,9 +1,13 @@
 package com.example.timetracker.service;
 
-import com.example.timetracker.domain.*;
+import com.example.timetracker.domain.Activity;
+import com.example.timetracker.domain.ActivityStatus;
+import com.example.timetracker.domain.AppUser;
+import com.example.timetracker.domain.Project;
 import com.example.timetracker.dto.ActivityCreateDTO;
 import com.example.timetracker.dto.ActivityReadDTO;
 import com.example.timetracker.dto.ActivityUpdateDTO;
+import com.example.timetracker.dto.WorkingDayReadDTO;
 import com.example.timetracker.exception.ActionProhibitedException;
 import com.example.timetracker.repository.ActivityRepository;
 import org.assertj.core.api.Assertions;
@@ -11,9 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,22 +28,6 @@ public class ActivityServiceTest extends BaseServiceTest {
     private ActivityService activityService;
 
     @Test
-    public void testGetUserActivities() {
-        AppUser user1 = testObjectFactory.createUser("111", "111@mail.com");
-        AppUser user2 = testObjectFactory.createUser("222", "222@mail.com");
-        Project project = testObjectFactory.createProject();
-        Activity a1 = testObjectFactory.createActivity(user1, ActivityStatus.NEW, project);
-        Activity a2 = testObjectFactory.createActivity(user2, ActivityStatus.NEW, project);
-        Activity a3 = testObjectFactory.createActivity(user2, ActivityStatus.NEW, project);
-
-        List<ActivityReadDTO> userActivities = activityService.getUserActivities(user2.getId());
-
-        Assertions.assertThat(userActivities)
-                .extracting("id")
-                .containsExactlyInAnyOrder(a2.getId(), a3.getId());
-    }
-
-    @Test
     public void testGetAllUserActivitiesByDate() {
         AppUser user = testObjectFactory.createUser();
         Project project = testObjectFactory.createProject();
@@ -50,9 +36,9 @@ public class ActivityServiceTest extends BaseServiceTest {
         Activity a1 = testObjectFactory.createActivity(user, ActivityStatus.NEW, project, date);
         Activity a2 = testObjectFactory.createActivity(user, ActivityStatus.NEW, project, date2);
 
-        List<ActivityReadDTO> userActivities = activityService.getUserActivitiesByDate(user.getId(), date2);
+        WorkingDayReadDTO readDTO = activityService.getUserActivitiesByDate(user.getId(), date2);
 
-        Assertions.assertThat(userActivities)
+        Assertions.assertThat(readDTO.getActivities())
                 .extracting("id")
                 .containsExactly(a2.getId());
     }

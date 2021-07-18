@@ -3,13 +3,13 @@ package com.example.timetracker.controller;
 import com.example.timetracker.dto.ActivityCreateDTO;
 import com.example.timetracker.dto.ActivityReadDTO;
 import com.example.timetracker.dto.ActivityUpdateDTO;
+import com.example.timetracker.dto.WorkingDayReadDTO;
 import com.example.timetracker.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,7 +20,7 @@ public class ActivityController {
     private ActivityService activityService;
 
     @GetMapping
-    public List<ActivityReadDTO> getUserActivities(
+    public WorkingDayReadDTO getUserActivities(
             @PathVariable UUID userId,
             @RequestParam(value = "date", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
@@ -28,7 +28,7 @@ public class ActivityController {
         if (date != null) {
             return activityService.getUserActivitiesByDate(userId, date);
         }
-        return activityService.getUserActivities(userId);
+        return activityService.getUserActivitiesByDate(userId, LocalDate.now());
     }
 
     @PostMapping

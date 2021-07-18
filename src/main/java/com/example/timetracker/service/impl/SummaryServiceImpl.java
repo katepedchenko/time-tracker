@@ -27,9 +27,9 @@ public class SummaryServiceImpl implements SummaryService {
 
         AppUserReadDTO user = appUserService.getUserById(userId);
         summaryDTO.setUser(user);
-
-        List<ActivityReadDTO> workdayEntries = activityService.getUserActivities(userId);
-        summaryDTO.setEntries(workdayEntries);
+//
+//        List<ActivityReadDTO> workdayEntries = activityService.getUserActivities(userId);
+//        summaryDTO.setEntries(workdayEntries);
 
         return summaryDTO;
     }

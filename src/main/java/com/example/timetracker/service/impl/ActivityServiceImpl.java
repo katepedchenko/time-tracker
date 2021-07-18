@@ -7,6 +7,7 @@ import com.example.timetracker.domain.Project;
 import com.example.timetracker.dto.ActivityCreateDTO;
 import com.example.timetracker.dto.ActivityReadDTO;
 import com.example.timetracker.dto.ActivityUpdateDTO;
+import com.example.timetracker.dto.WorkingDayReadDTO;
 import com.example.timetracker.exception.EntityNotFoundException;
 import com.example.timetracker.exception.ActionProhibitedException;
 import com.example.timetracker.repository.ActivityRepository;
@@ -37,18 +38,23 @@ public class ActivityServiceImpl implements ActivityService {
     @Autowired
     private TranslationService translationService;
 
+    @Transactional
     @Override
-    public List<ActivityReadDTO> getUserActivities(UUID userId) {
-        List<Activity> entries = activityRepository.findByUserId(userId);
-        return mapToReadDTOList(entries);
-    }
-
-    @Override
-    public List<ActivityReadDTO> getUserActivitiesByDate(UUID userId, LocalDate date) {
+    public WorkingDayReadDTO getUserActivitiesByDate(UUID userId, LocalDate date) {
+        AppUser user = getUserRequired(userId);
         List<Activity> entries = activityRepository.findByUserIdAndDate(userId, date);
 
-        // todo create new DTO with UserDTO and calculate hours by date
-        return mapToReadDTOList(entries);
+        WorkingDayReadDTO dto = new WorkingDayReadDTO();
+        dto.setActivities(mapToReadDTOList(entries));
+        dto.setWorkHoursNorm(user.getWorkHoursNorm());
+        dto.setAllowedOvertimeHours(user.getAllowedOvertimeHours());
+        dto.setAllowedPausedHours(user.getAllowedPausedHours());
+
+        int totalHours = entries.stream().mapToInt(Activity::getHours).sum();
+        dto.setTotalTrackedHours(totalHours);
+        dto.setWorkHoursDelta(totalHours - user.getWorkHoursNorm());
+
+        return dto;
     }
 
     @Transactional
