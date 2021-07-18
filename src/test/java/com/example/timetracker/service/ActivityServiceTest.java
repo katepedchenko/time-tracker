@@ -3,18 +3,19 @@ package com.example.timetracker.service;
 import com.example.timetracker.domain.*;
 import com.example.timetracker.dto.ActivityCreateDTO;
 import com.example.timetracker.dto.ActivityReadDTO;
+import com.example.timetracker.dto.ActivityUpdateDTO;
+import com.example.timetracker.exception.ActionProhibitedException;
 import com.example.timetracker.repository.ActivityRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ActivityServiceTest extends BaseServiceTest {
 
@@ -29,9 +30,9 @@ public class ActivityServiceTest extends BaseServiceTest {
         AppUser user1 = testObjectFactory.createUser("111", "111@mail.com");
         AppUser user2 = testObjectFactory.createUser("222", "222@mail.com");
         Project project = testObjectFactory.createProject();
-        Activity a1 = testObjectFactory.createActivity(user1, EntryStatus.NEW, project);
-        Activity a2 = testObjectFactory.createActivity(user2, EntryStatus.STARTED, project);
-        Activity a3 = testObjectFactory.createActivity(user2, EntryStatus.PAUSED, project);
+        Activity a1 = testObjectFactory.createActivity(user1, ActivityStatus.NEW, project);
+        Activity a2 = testObjectFactory.createActivity(user2, ActivityStatus.NEW, project);
+        Activity a3 = testObjectFactory.createActivity(user2, ActivityStatus.NEW, project);
 
         List<ActivityReadDTO> userActivities = activityService.getUserActivities(user2.getId());
 
@@ -44,13 +45,12 @@ public class ActivityServiceTest extends BaseServiceTest {
     public void testGetAllUserActivitiesByDate() {
         AppUser user = testObjectFactory.createUser();
         Project project = testObjectFactory.createProject();
-        LocalDateTime time = LocalDateTime.of(2021, 5, 20, 9, 30, 0);
-        LocalDateTime time2 = LocalDateTime.of(2021, 5, 15, 9, 30, 0);
-        Activity a1 = testObjectFactory.createActivity(user, EntryStatus.NEW, project, time);
-        Activity a2 = testObjectFactory.createActivity(user, EntryStatus.STARTED, project, time2);
+        LocalDate date = LocalDate.of(2021, 5, 20);
+        LocalDate date2 = LocalDate.of(2021, 5, 15);
+        Activity a1 = testObjectFactory.createActivity(user, ActivityStatus.NEW, project, date);
+        Activity a2 = testObjectFactory.createActivity(user, ActivityStatus.NEW, project, date2);
 
-        LocalDate date = LocalDate.of(time2.getYear(), time2.getMonth(), time2.getDayOfMonth());
-        List<ActivityReadDTO> userActivities = activityService.getUserActivitiesByDate(user.getId(), date);
+        List<ActivityReadDTO> userActivities = activityService.getUserActivitiesByDate(user.getId(), date2);
 
         Assertions.assertThat(userActivities)
                 .extracting("id")
@@ -64,80 +64,100 @@ public class ActivityServiceTest extends BaseServiceTest {
 
         ActivityCreateDTO createDTO = new ActivityCreateDTO();
         createDTO.setDescription("some text");
+        createDTO.setHours(5);
         createDTO.setProjectId(project.getId());
 
         ActivityReadDTO readDTO = activityService.createActivity(user.getId(), createDTO);
 
-        assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("startedAt", "finishedAt");
         assertEquals(user.getId(), readDTO.getUserId());
         assertNotNull(readDTO.getProject());
+        assertNotNull(readDTO.getDate());
+        assertNotNull(readDTO.getHours());
         assertEquals(project.getId(), readDTO.getProject().getId());
 
         Activity entryFromDb = activityRepository.findById(readDTO.getId()).get();
-        assertEquals(EntryStatus.NEW, entryFromDb.getStatus());
+        assertEquals(ActivityStatus.NEW, entryFromDb.getStatus());
         assertEquals(project.getId(), entryFromDb.getProject().getId());
     }
 
     @Test
-    public void testStartActivity() {
+    public void testUpdateActivity() {
         AppUser user = testObjectFactory.createUser();
         Project project = testObjectFactory.createProject();
-        Activity activity = testObjectFactory.createActivity(user, EntryStatus.NEW, project);
+        Activity activity = testObjectFactory.createActivity(user, ActivityStatus.NEW, project);
 
-        ActivityReadDTO readDTO = activityService.startActivity(user.getId(), activity.getId());
+        ActivityUpdateDTO updateDTO = new ActivityUpdateDTO();
+        updateDTO.setDescription("new description");
+        updateDTO.setHours(9);
 
-        assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("finishedAt");
-        assertEquals(user.getId(), readDTO.getUserId());
+        ActivityReadDTO readDTO = activityService.updateActivity(user.getId(), activity.getId(), updateDTO);
+
+        assertEquals(updateDTO.getDescription(), readDTO.getDescription());
+        assertEquals(updateDTO.getHours(), readDTO.getHours());
 
         Activity entryFromDb = activityRepository.findById(readDTO.getId()).get();
-        assertEquals(1, entryFromDb.getTimeEntries().size());
-        assertEquals(EntryStatus.STARTED, entryFromDb.getStatus());
+        assertEquals(updateDTO.getDescription(), entryFromDb.getDescription());
+        assertEquals(updateDTO.getHours(), entryFromDb.getHours());
     }
 
     @Test
-    public void testPauseActivity() {
+    public void testUpdatePostedActivity() {
         AppUser user = testObjectFactory.createUser();
         Project project = testObjectFactory.createProject();
-        Activity activity = testObjectFactory.createActivity(user, EntryStatus.STARTED, project);
-        TimeEntry timeEntry = testObjectFactory.createNotFinishedTimeEntry(activity);
+        Activity activity = testObjectFactory.createActivity(user, ActivityStatus.POSTED, project);
 
-        ActivityReadDTO readDTO = activityService.pauseActivity(user.getId(), activity.getId());
+        ActivityUpdateDTO updateDTO = new ActivityUpdateDTO();
+        updateDTO.setDescription("new description");
+        updateDTO.setHours(9);
 
-        assertEquals(EntryStatus.PAUSED, readDTO.getStatus());
-        assertEquals(1, readDTO.getTimeEntries().size());
-        assertNotNull(readDTO.getTimeEntries().get(0).getFinishedAt());
-        assertEquals(timeEntry.getId(), readDTO.getTimeEntries().get(0).getId());
+        assertThatThrownBy(() -> activityService.updateActivity(user.getId(), activity.getId(), updateDTO))
+                .isInstanceOf(ActionProhibitedException.class);
     }
 
     @Test
-    public void testResumeActivity() {
+    public void testPostActivity() {
         AppUser user = testObjectFactory.createUser();
         Project project = testObjectFactory.createProject();
-        Activity activity = testObjectFactory.createActivity(user, EntryStatus.STARTED, project);
-        TimeEntry timeEntry = testObjectFactory.createFinishedTimeEntry(activity);
+        Activity activity = testObjectFactory.createActivity(user, ActivityStatus.NEW, project);
 
-        ActivityReadDTO readDTO = activityService.resumeActivity(user.getId(), activity.getId());
+        ActivityReadDTO readDTO = activityService.postActivity(user.getId(), activity.getId());
+        assertEquals(ActivityStatus.POSTED, readDTO.getStatus());
 
-        assertEquals(EntryStatus.STARTED, readDTO.getStatus());
-        assertEquals(2, readDTO.getTimeEntries().size());
-        assertNotNull(readDTO.getTimeEntries().get(0).getFinishedAt());
-        assertNotNull(readDTO.getTimeEntries().get(1).getStartedAt());
-        assertEquals(timeEntry.getId(), readDTO.getTimeEntries().get(0).getId());
+        Activity entryFromDb = activityRepository.findById(readDTO.getId()).get();
+        assertEquals(ActivityStatus.POSTED, entryFromDb.getStatus());
+
     }
 
     @Test
-    public void testStopActivity() {
+    public void testPostAlreadyPostedActivity() {
         AppUser user = testObjectFactory.createUser();
         Project project = testObjectFactory.createProject();
-        Activity activity = testObjectFactory.createActivity(user, EntryStatus.STARTED, project);
-        TimeEntry timeEntry = testObjectFactory.createNotFinishedTimeEntry(activity);
+        Activity activity = testObjectFactory.createActivity(user, ActivityStatus.POSTED, project);
 
-        ActivityReadDTO readDTO = activityService.stopActivity(user.getId(), activity.getId());
+        assertThatThrownBy(() -> activityService.postActivity(user.getId(), activity.getId()))
+                .isInstanceOf(ActionProhibitedException.class);
+    }
 
-        assertEquals(EntryStatus.FINISHED, readDTO.getStatus());
-        assertEquals(1, readDTO.getTimeEntries().size());
-        assertNotNull(readDTO.getTimeEntries().get(0).getFinishedAt());
-        assertNotNull(readDTO.getTimeEntries().get(0).getStartedAt());
-        assertEquals(timeEntry.getId(), readDTO.getTimeEntries().get(0).getId());
+    @Test
+    public void testDeleteActivity() {
+        AppUser user = testObjectFactory.createUser();
+        Project project = testObjectFactory.createProject();
+        Activity activity = testObjectFactory.createActivity(user, ActivityStatus.NEW, project);
+
+        activityService.deleteActivity(user.getId(), activity.getId());
+
+        assertFalse(activityRepository.existsById(activity.getId()));
+    }
+
+    @Test
+    public void testDeleteAlreadyPostedActivity() {
+        AppUser user = testObjectFactory.createUser();
+        Project project = testObjectFactory.createProject();
+        Activity activity = testObjectFactory.createActivity(user, ActivityStatus.POSTED, project);
+
+        assertThatThrownBy(() -> activityService.deleteActivity(user.getId(), activity.getId()))
+                .isInstanceOf(ActionProhibitedException.class);
+
+        assertTrue(activityRepository.existsById(activity.getId()));
     }
 }

@@ -1,11 +1,9 @@
 package com.example.timetracker.dto;
 
-import com.example.timetracker.domain.EntryStatus;
+import com.example.timetracker.domain.ActivityStatus;
 import lombok.Data;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -13,19 +11,15 @@ public class ActivityReadDTO {
 
     private UUID id;
 
-    private LocalDateTime startedAt;
+    private LocalDate date;
 
-    private LocalDateTime finishedAt;
+    private Integer hours;
 
-    private EntryStatus status;
+    private ActivityStatus status;
 
     private String description;
 
     private UUID userId;
-
-    private List<TimeEntryReadDTO> timeEntries;
-
-    private Duration totalTime;
 
     private ProjectReadDTO project;
 }

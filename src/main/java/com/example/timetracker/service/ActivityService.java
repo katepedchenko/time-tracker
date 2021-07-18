@@ -2,6 +2,7 @@ package com.example.timetracker.service;
 
 import com.example.timetracker.dto.ActivityCreateDTO;
 import com.example.timetracker.dto.ActivityReadDTO;
+import com.example.timetracker.dto.ActivityUpdateDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,11 +16,9 @@ public interface ActivityService {
 
     ActivityReadDTO createActivity(UUID userId, ActivityCreateDTO createDTO);
 
-    ActivityReadDTO startActivity(UUID userId, UUID activityId);
+    ActivityReadDTO updateActivity(UUID userId, UUID activityId, ActivityUpdateDTO updateDTO);
 
-    ActivityReadDTO pauseActivity(UUID userId, UUID activityId);
+    ActivityReadDTO postActivity(UUID userId, UUID activityId);
 
-    ActivityReadDTO resumeActivity(UUID userId, UUID activityId);
-
-    ActivityReadDTO stopActivity(UUID userId, UUID activityId);
+    void deleteActivity(UUID userId, UUID activityId);
 }

@@ -1,11 +1,8 @@
 package com.example.timetracker.controller;
 
-import com.example.timetracker.domain.EntryStatus;
+import com.example.timetracker.domain.ActivityStatus;
 import com.example.timetracker.domain.UserRoleType;
-import com.example.timetracker.dto.AppUserReadDTO;
-import com.example.timetracker.dto.SummaryDTO;
-import com.example.timetracker.dto.UserRoleReadDTO;
-import com.example.timetracker.dto.ActivityReadDTO;
+import com.example.timetracker.dto.*;
 import com.example.timetracker.service.SummaryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,7 +35,7 @@ public class SummaryControllerTest {
     @Test
     public void testCreateSummary() throws Exception {
         AppUserReadDTO user = createUserReadDTO(UserRoleType.USER);
-        SummaryDTO expectedResult = createSummaryDTO(user, List.of(createWorkdayReadDTO(user.getId())));
+        SummaryDTO expectedResult = createSummaryDTO(user, List.of(createActivityReadDTO(user.getId())));
 
         Mockito.when(summaryService.createSummary(user.getId()))
                 .thenReturn(expectedResult);
@@ -79,13 +76,22 @@ public class SummaryControllerTest {
         return dto;
     }
 
-    private ActivityReadDTO createWorkdayReadDTO(UUID userId) {
+    private ActivityReadDTO createActivityReadDTO(UUID userId) {
         ActivityReadDTO dto = new ActivityReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setUserId(userId);
-        dto.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));
-        dto.setFinishedAt(LocalDateTime.of(2021, 5, 20, 18, 30, 0));
-        dto.setStatus(EntryStatus.FINISHED);
+        dto.setDate(LocalDate.of(2021, 5, 11));
+        dto.setHours(4);
+        dto.setStatus(ActivityStatus.NEW);
+        dto.setDescription("activity description");
+        dto.setProject(creatProjectReadDTO());
+        return dto;
+    }
+
+    private ProjectReadDTO creatProjectReadDTO() {
+        ProjectReadDTO dto = new ProjectReadDTO();
+        dto.setName("some name");
+        dto.setId(UUID.randomUUID());
         return dto;
     }
 }

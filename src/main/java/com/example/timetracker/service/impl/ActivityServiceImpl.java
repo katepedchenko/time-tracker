@@ -1,9 +1,14 @@
 package com.example.timetracker.service.impl;
 
-import com.example.timetracker.domain.*;
+import com.example.timetracker.domain.Activity;
+import com.example.timetracker.domain.ActivityStatus;
+import com.example.timetracker.domain.AppUser;
+import com.example.timetracker.domain.Project;
 import com.example.timetracker.dto.ActivityCreateDTO;
 import com.example.timetracker.dto.ActivityReadDTO;
+import com.example.timetracker.dto.ActivityUpdateDTO;
 import com.example.timetracker.exception.EntityNotFoundException;
+import com.example.timetracker.exception.ActionProhibitedException;
 import com.example.timetracker.repository.ActivityRepository;
 import com.example.timetracker.repository.AppUserRepository;
 import com.example.timetracker.repository.ProjectRepository;
@@ -12,13 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,18 +40,15 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public List<ActivityReadDTO> getUserActivities(UUID userId) {
         List<Activity> entries = activityRepository.findByUserId(userId);
-        return entries.stream()
-                .map(calcTotalTimeAndMapToDTO)
-                .collect(Collectors.toList());
+        return mapToReadDTOList(entries);
     }
 
     @Override
     public List<ActivityReadDTO> getUserActivitiesByDate(UUID userId, LocalDate date) {
-        List<Activity> entries = activityRepository.findByUserId(userId);
-        return entries.stream()
-                .filter(filterByDate(date))
-                .map(calcTotalTimeAndMapToDTO)
-                .collect(Collectors.toList());
+        List<Activity> entries = activityRepository.findByUserIdAndDate(userId, date);
+
+        // todo create new DTO with UserDTO and calculate hours by date
+        return mapToReadDTOList(entries);
     }
 
     @Transactional
@@ -61,102 +59,54 @@ public class ActivityServiceImpl implements ActivityService {
 
         Activity activity = new Activity();
         activity.setDescription(createDTO.getDescription());
+        activity.setHours(createDTO.getHours());
         activity.setProject(project);
         activity.setUser(user);
-        activity.setStatus(EntryStatus.NEW);
+        activity.setStatus(ActivityStatus.NEW);
+        activity.setDate(LocalDate.now());
 
         activity = activityRepository.save(activity);
 
-        ActivityReadDTO dto = translationService.translate(activity, ActivityReadDTO.class);
-        dto.setTotalTime(calculateTotalTime(activity));
-        dto.setUserId(activity.getUser().getId());
-        return dto;
+        return mapToReadDTO(activity);
     }
 
-    @Transactional
     @Override
-    public ActivityReadDTO startActivity(UUID userId, UUID activityId) {
-        LocalDateTime currentTime = LocalDateTime.now();
-
+    public ActivityReadDTO updateActivity(UUID userId, UUID activityId, ActivityUpdateDTO updateDTO) {
         Activity activity = activityRepository.findByIdAndUserId(activityId, userId);
-        activity.setStatus(EntryStatus.STARTED);
-        activity.setStartedAt(currentTime);
 
-        TimeEntry timeEntry = new TimeEntry();
-        timeEntry.setStartedAt(currentTime);
-        timeEntry.setActivity(activity);
-        activity.getTimeEntries().add(timeEntry);
+        if (activity.getStatus() == ActivityStatus.POSTED) {
+            throw new ActionProhibitedException(activity.getId());
+        }
 
+        translationService.map(updateDTO, activity);
         activity = activityRepository.save(activity);
 
-        ActivityReadDTO dto = translationService.translate(activity, ActivityReadDTO.class);
-        dto.setTotalTime(calculateTotalTime(activity));
-        dto.setUserId(activity.getUser().getId());
-        return dto;
+        return mapToReadDTO(activity);
     }
 
-    @Transactional
     @Override
-    public ActivityReadDTO pauseActivity(UUID userId, UUID activityId) {
+    public ActivityReadDTO postActivity(UUID userId, UUID activityId) {
         Activity activity = activityRepository.findByIdAndUserId(activityId, userId);
 
-        activity.setStatus(EntryStatus.PAUSED);
+        if (activity.getStatus() == ActivityStatus.POSTED) {
+            throw new ActionProhibitedException(activity.getId());
+        }
 
-        TimeEntry lastTimeEntry = activity.getTimeEntries().stream()
-                .filter(e -> e.getFinishedAt() == null)
-                .findFirst().get();
-
-        lastTimeEntry.setFinishedAt(LocalDateTime.now());
-
+        activity.setStatus(ActivityStatus.POSTED);
         activity = activityRepository.save(activity);
 
-        ActivityReadDTO dto = translationService.translate(activity, ActivityReadDTO.class);
-        dto.setTotalTime(calculateTotalTime(activity));
-        dto.setUserId(userId);
-        return dto;
+        return mapToReadDTO(activity);
     }
 
-    @Transactional
     @Override
-    public ActivityReadDTO resumeActivity(UUID userId, UUID activityId) {
+    public void deleteActivity(UUID userId, UUID activityId) {
         Activity activity = activityRepository.findByIdAndUserId(activityId, userId);
 
-        activity.setStatus(EntryStatus.STARTED);
+        if (activity.getStatus() == ActivityStatus.POSTED) {
+            throw new ActionProhibitedException(activity.getId());
+        }
 
-        TimeEntry timeEntry = new TimeEntry();
-        timeEntry.setStartedAt(LocalDateTime.now());
-        timeEntry.setActivity(activity);
-        activity.getTimeEntries().add(timeEntry);
-
-        activity = activityRepository.save(activity);
-
-        ActivityReadDTO dto = translationService.translate(activity, ActivityReadDTO.class);
-        dto.setTotalTime(calculateTotalTime(activity));
-        dto.setUserId(userId);
-        return dto;
-    }
-
-    @Transactional
-    @Override
-    public ActivityReadDTO stopActivity(UUID userId, UUID activityId) {
-        Activity activity = activityRepository.findByIdAndUserId(activityId, userId);
-
-        activity.setStatus(EntryStatus.FINISHED);
-
-        TimeEntry lastTimeEntry = activity.getTimeEntries().stream()
-                .filter(e -> e.getFinishedAt() == null)
-                .findFirst().get();
-
-        LocalDateTime currentTime = LocalDateTime.now();
-        lastTimeEntry.setFinishedAt(currentTime);
-        activity.setFinishedAt(currentTime);
-
-        activity = activityRepository.save(activity);
-
-        ActivityReadDTO dto = translationService.translate(activity, ActivityReadDTO.class);
-        dto.setTotalTime(calculateTotalTime(activity));
-        dto.setUserId(userId);
-        return dto;
+        activityRepository.deleteById(activityId);
     }
 
     private AppUser getUserRequired(UUID id) {
@@ -169,25 +119,19 @@ public class ActivityServiceImpl implements ActivityService {
                 .orElseThrow(() -> new EntityNotFoundException(Project.class, id));
     }
 
-    private Predicate<Activity> filterByDate(LocalDate date) {
-        return entry -> {
-            LocalDateTime ldt = entry.getStartedAt();
-            LocalDate startedDate = LocalDate.of(ldt.getYear(), ldt.getMonth(), ldt.getDayOfMonth());
-            return date.equals(startedDate);
-        };
+    private List<ActivityReadDTO> mapToReadDTOList(List<Activity> entries) {
+        return entries.stream()
+                .map(e -> {
+                    ActivityReadDTO dto = translationService.translate(e, ActivityReadDTO.class);
+                    dto.setUserId(e.getUser().getId());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
-    private final Function<Activity, ActivityReadDTO> calcTotalTimeAndMapToDTO = entry -> {
-        Duration duration = calculateTotalTime(entry);
+    private ActivityReadDTO mapToReadDTO(Activity entry) {
         ActivityReadDTO dto = translationService.translate(entry, ActivityReadDTO.class);
-        dto.setTotalTime(duration);
+        dto.setUserId(entry.getUser().getId());
         return dto;
-    };
-
-    private Duration calculateTotalTime(Activity entry) {
-        return entry.getTimeEntries()
-                .stream()
-                .map(TimeEntry::getDuration)
-                .reduce(Duration.ZERO, Duration::plus);
     }
 }

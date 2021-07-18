@@ -4,6 +4,7 @@ import com.example.timetracker.domain.Activity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ public interface ActivityRepository extends CrudRepository<Activity, UUID> {
 
     List<Activity> findByUserId(UUID userId);
 
-    Activity findByIdAndUserId(UUID workdayEntryId, UUID userId);
+    List<Activity> findByUserIdAndDate(UUID userId, LocalDate date);
 
-    List<Activity> findByUserIdAndFinishedAtIsNull(UUID userId);
+    Activity findByIdAndUserId(UUID workdayEntryId, UUID userId);
 }

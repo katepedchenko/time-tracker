@@ -16,14 +16,12 @@ public class SummaryServiceTest extends BaseServiceTest {
     public void testCreateSummary() {
         AppUser user = testObjectFactory.createUser();
         Project project = testObjectFactory.createProject();
-        Activity activity = testObjectFactory.createActivity(user, EntryStatus.STARTED, project);
-        TimeEntry timeEntry = testObjectFactory.createFinishedTimeEntry(activity);
+        Activity activity = testObjectFactory.createActivity(user, ActivityStatus.NEW, project);
 
         SummaryDTO summary = summaryService.createSummary(user.getId());
 
         assertEquals(user.getId(), summary.getUser().getId());
         assertEquals(1, summary.getEntries().size());
         assertEquals(activity.getId(), summary.getEntries().get(0).getId());
-        assertEquals(timeEntry.getId(), summary.getEntries().get(0).getTimeEntries().get(0).getId());
     }
 }

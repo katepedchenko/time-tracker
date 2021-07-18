@@ -12,7 +12,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 @Sql(statements = {
-        "delete from time_entry",
         "delete from activity",
         "delete from project",
         "delete from app_user"},

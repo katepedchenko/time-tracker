@@ -1,14 +1,13 @@
 package com.example.timetracker.util;
 
 import com.example.timetracker.domain.*;
+import com.example.timetracker.repository.ActivityRepository;
 import com.example.timetracker.repository.AppUserRepository;
 import com.example.timetracker.repository.ProjectRepository;
-import com.example.timetracker.repository.TimeEntryRepository;
-import com.example.timetracker.repository.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Component
 public class TestObjectFactory {
@@ -18,9 +17,6 @@ public class TestObjectFactory {
 
     @Autowired
     private ActivityRepository activityRepository;
-
-    @Autowired
-    private TimeEntryRepository timeEntryRepository;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -64,38 +60,23 @@ public class TestObjectFactory {
         return appUserRepository.save(user);
     }
 
-    public TimeEntry createFinishedTimeEntry(Activity activity) {
-        TimeEntry entry = new TimeEntry();
-        entry.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));
-        entry.setFinishedAt(LocalDateTime.of(2021, 5, 20, 12, 30, 0));
-        entry.setActivity(activity);
-
-        return timeEntryRepository.save(entry);
-    }
-
-    public TimeEntry createNotFinishedTimeEntry(Activity activity) {
-        TimeEntry entry = new TimeEntry();
-        entry.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));
-        entry.setActivity(activity);
-
-        return timeEntryRepository.save(entry);
-    }
-
-    public Activity createActivity(AppUser user, EntryStatus status, Project project) {
+    public Activity createActivity(AppUser user, ActivityStatus status, Project project) {
         Activity entry = new Activity();
         entry.setUser(user);
         entry.setStatus(status);
-        entry.setStartedAt(LocalDateTime.of(2021, 5, 20, 9, 30, 0));
+        entry.setDate(LocalDate.of(2021, 5, 20));
+        entry.setHours(4);
         entry.setDescription("some text");
         entry.setProject(project);
         return activityRepository.save(entry);
     }
 
-    public Activity createActivity(AppUser user, EntryStatus status, Project project, LocalDateTime localDateTime) {
+    public Activity createActivity(AppUser user, ActivityStatus status, Project project, LocalDate localDate) {
         Activity entry = new Activity();
         entry.setUser(user);
         entry.setStatus(status);
-        entry.setStartedAt(localDateTime);
+        entry.setDate(localDate);
+        entry.setHours(4);
         entry.setDescription("some text");
         entry.setProject(project);
         return activityRepository.save(entry);
