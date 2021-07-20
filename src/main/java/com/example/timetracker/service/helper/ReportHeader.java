@@ -1,4 +1,4 @@
 package com.example.timetracker.service.helper;
 
-public interface ReportHelper {
+public class ReportHeader {
 }

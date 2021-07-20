@@ -4,6 +4,7 @@ import com.example.timetracker.dto.SummaryDTO;
 import com.example.timetracker.service.ReportService;
 import com.example.timetracker.service.SummaryService;
 import com.example.timetracker.service.helper.ExcelReportHelper;
+import com.example.timetracker.service.helper.PDFReportHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,9 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private ExcelReportHelper excelReportHelper;
 
+    @Autowired
+    private PDFReportHelper pdfReportHelper;
+
     @Override
     public ByteArrayInputStream exportToExcel(UUID userId, LocalDate beginDate, LocalDate endDate) {
         SummaryDTO summary = summaryService.createSummary(userId, beginDate, endDate);
@@ -29,6 +33,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ByteArrayInputStream exportToPDF(UUID userId, LocalDate beginDate, LocalDate endDate) {
-        return new ByteArrayInputStream(new byte[0]);
+        SummaryDTO summary = summaryService.createSummary(userId, beginDate, endDate);
+        byte[] report = pdfReportHelper.createReport(summary);
+        return new ByteArrayInputStream(report);
     }
 }

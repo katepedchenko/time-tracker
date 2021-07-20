@@ -19,7 +19,6 @@ public class ReportController {
     @Autowired
     private ReportService reportService;
 
-
     @PostMapping("/xlsx")
     public ResponseEntity<InputStreamResource> exportToExcel(
             @PathVariable UUID userId,
@@ -30,6 +29,23 @@ public class ReportController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=report.xlsx");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(new InputStreamResource(exportBytes));
+    }
+
+    @PostMapping("/pdf")
+    public ResponseEntity<InputStreamResource> exportToPDF(
+            @PathVariable UUID userId,
+            @RequestParam(value = "begin-date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate beginDate,
+            @RequestParam(value = "end-date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        ByteArrayInputStream exportBytes = reportService.exportToPDF(userId, beginDate, endDate);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=report.pdf");
 
         return ResponseEntity
                 .ok()
