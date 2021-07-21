@@ -1,6 +1,7 @@
 package com.example.timetracker.controller;
 
 import com.example.timetracker.service.ReportService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,6 +20,7 @@ public class ReportController {
     @Autowired
     private ReportService reportService;
 
+    @ApiOperation(value = "Export report to Excel file")
     @PostMapping("/xlsx")
     public ResponseEntity<InputStreamResource> exportToExcel(
             @PathVariable UUID userId,
@@ -36,6 +38,7 @@ public class ReportController {
                 .body(new InputStreamResource(exportBytes));
     }
 
+    @ApiOperation(value = "Export report to PDF file")
     @PostMapping("/pdf")
     public ResponseEntity<InputStreamResource> exportToPDF(
             @PathVariable UUID userId,

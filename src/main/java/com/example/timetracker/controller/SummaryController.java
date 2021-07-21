@@ -2,6 +2,7 @@ package com.example.timetracker.controller;
 
 import com.example.timetracker.dto.SummaryDTO;
 import com.example.timetracker.service.SummaryService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ public class SummaryController {
     @Autowired
     private SummaryService summaryService;
 
+    @ApiOperation(value = "Load report of user's activities")
     @GetMapping
     public SummaryDTO getSummary(
             @PathVariable UUID userId,
