@@ -57,6 +57,7 @@ public class ExcelReportHelper {
                 row = sheet.createRow(rowNumber++);
 
                 for (ActivityReadDTO activity : entry.getActivities()) {
+                    addDateCell(dateStyle, row, 0, activity.getDate());
                     addStringCell(stringStyle, row, 1, activity.getProject().getName());
                     addStringCell(stringStyle, row, 2, activity.getDescription());
                     addNumberCell(numberStyle, row, 3, activity.getHours());

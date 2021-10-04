@@ -84,7 +84,7 @@ public class PDFReportHelper {
 
     private void addActivityRows(PdfPTable table, List<ActivityReadDTO> activities) {
         for (ActivityReadDTO activity : activities) {
-            table.addCell(getCell(""));
+            table.addCell(getCell(activity.getDate().toString()));
             table.addCell(getCell(activity.getProject().getName()));
             table.addCell(getCell(activity.getDescription()));
             table.addCell(getCell(activity.getHours()));
